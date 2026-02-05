@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 // Icons
 const Globe = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>);
 const Search = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
@@ -733,7 +736,7 @@ export default function OnboardingApp() {
     
     try {
       // Only call onboard API - this does the AI analysis and discovers competitors
-      const onboardResponse = await fetch('http://localhost:3000/api/onboard', {
+      const onboardResponse = await fetch(`${API_URL}/api/onboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain })
@@ -820,12 +823,12 @@ export default function OnboardingApp() {
     try {
       // Fetch blogs and sitemap in parallel
       const [blogsResponse, sitemapResponse] = await Promise.all([
-        fetch('http://localhost:3000/api/blogs', {
+        fetch(`${API_URL}/api/blogs`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ domain: clientData.domain, limit: 20 })
         }),
-        fetch('http://localhost:3000/api/sitemap', {
+        fetch(`${API_URL}/api/sitemap`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ domain: clientData.domain })
@@ -876,7 +879,7 @@ export default function OnboardingApp() {
         setLoadMsg(`Analyzing competitor: ${c.name}...`);
         
         try {
-          const response = await fetch('http://localhost:3000/api/onboard', {
+          const response = await fetch(`${API_URL}/api/onboard`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ domain: c.domain })
@@ -921,7 +924,7 @@ export default function OnboardingApp() {
     // Step 2: Fetch blog posts for the client (needed for style selection)
     setLoadMsg('Scraping your blog posts for style selection...');
     try {
-      const blogsResponse = await fetch('http://localhost:3000/api/blogs', {
+      const blogsResponse = await fetch(`${API_URL}/api/blogs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: clientData.domain, limit: 20 })
@@ -956,7 +959,7 @@ export default function OnboardingApp() {
     setLoadMsg('Submitting to BTA...');
     
     try {
-      const response = await fetch('http://localhost:3000/api/submit', {
+      const response = await fetch(`${API_URL}/api/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
