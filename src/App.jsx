@@ -481,7 +481,7 @@ const StyleSelection = ({ blogPosts, onComplete, likedPosts, setLikedPosts }) =>
 
 
 // === COMPETITOR READ-ONLY VIEW (for comparison) ===
-const CompetitorReadOnly = ({ data, competitorName }) => {
+const CompetitorReadOnly = ({ data, competitorName, competitorDomain }) => {
   if (!data) return <p className="text-stone-500 text-center py-8">No data available for this competitor</p>;
   
   const ReadOnlySection = ({ label, icon: Icon, children }) => (
@@ -508,7 +508,7 @@ const CompetitorReadOnly = ({ data, competitorName }) => {
       {/* Header info */}
       <div className="bg-gradient-to-r from-stone-50 to-stone-100 rounded-xl p-4 border">
         <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">Competitor Analysis</p>
-        <h3 className="font-semibold text-stone-800 text-lg">{competitorName}</h3>
+        <h3 className="font-semibold text-stone-800 text-lg flex items-center gap-2"><img src={favicon(competitorDomain || competitorName)} width={24} height={24} alt="" className="rounded" />{competitorName}</h3>
         {data.industry && <span className="inline-block mt-2 px-2 py-0.5 bg-stone-200 text-stone-600 rounded text-xs">{data.industry}</span>}
       </div>
 
@@ -600,8 +600,8 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
   return (
     <div>
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <button onClick={() => setActiveTab('client')} className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap ${activeTab === 'client' ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}`}>{clientData.name}<span className="ml-2 px-1.5 py-0.5 text-xs rounded bg-emerald-100 text-emerald-700">You</span></button>
-        {competitors.map(c => (<button key={c.domain} onClick={() => setActiveTab(c.domain)} className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap ${activeTab === c.domain ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}`}>{c.name}</button>))}
+        <button onClick={() => setActiveTab('client')} className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === 'client' ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}`}><img src={favicon(clientData.domain)} width={18} height={18} alt="" className="rounded" />{clientData.name}<span className="ml-1 px-1.5 py-0.5 text-xs rounded bg-emerald-100 text-emerald-700">You</span></button>
+        {competitors.map(c => (<button key={c.domain} onClick={() => setActiveTab(c.domain)} className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === c.domain ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}`}><img src={favicon(c.domain)} width={18} height={18} alt="" className="rounded" />{c.name}</button>))}
       </div>
       
       {/* Show editable form ONLY for client, read-only for competitors */}
@@ -658,7 +658,7 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
       
       {/* Read-only view for competitors */}
       {!isClient && (
-        <CompetitorReadOnly data={d} competitorName={currentCompetitor?.name || activeTab} />
+        <CompetitorReadOnly data={d} competitorName={currentCompetitor?.name || activeTab} competitorDomain={currentCompetitor?.domain || activeTab} />
       )}
     </div>
   );
@@ -683,25 +683,44 @@ export default function OnboardingApp({ formToken }) {
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [sitemapData, setSitemapData] = useState(null); // Scraped sitemap/llms.txt data
+  const [blogError, setBlogError] = useState(null);
 
   // Client flow steps: 1=Competitors, 2=Style, 3=DataReview, 4=Submit
   const [clientStep, setClientStep] = useState(1);
   const [formLoading, setFormLoading] = useState(!!formToken);
+  const [formError, setFormError] = useState(null);
 
   // If opened via form link, load pre-scraped data from backend
   useEffect(() => {
     if (!formToken) return;
+    console.log('[Form] Loading token:', formToken);
     fetch(`${API_URL}/api/form/${formToken}`)
-      .then(r => r.json())
+      .then(r => {
+        console.log('[Form] Response status:', r.status);
+        if (!r.ok) throw new Error('Form not found or expired');
+        return r.json();
+      })
       .then(data => {
-        if (data.status === 'success' && data.clientData) {
-          setClientData(data.clientData);
+        console.log('[Form] Data received:', { status: data.status, hasClientData: !!data.clientData, domain: data.domain, competitorCount: data.competitors?.length });
+        if (data.status === 'success') {
+          if (data.clientData) {
+            setClientData(data.clientData);
+          } else if (data.domain) {
+            // Token exists but no pre-scraped data — build minimal clientData
+            setClientData({ domain: data.domain, name: data.clientName || data.domain, data: {}, blogPosts: [] });
+          }
           setCompetitors(data.competitors || []);
-          setDomain(data.domain);
+          setDomain(data.domain || '');
+        } else {
+          setFormError('This form link has no data. The admin may need to re-generate it.');
         }
         setFormLoading(false);
       })
-      .catch(() => setFormLoading(false));
+      .catch(err => {
+        console.error('[Form] Failed to load:', err.message);
+        setFormError('This form link is invalid or has expired. Please request a new link from your account manager.');
+        setFormLoading(false);
+      });
   }, [formToken]);
 
   // Admin: crawl domain - FAST version (no blog scraping yet)
@@ -773,17 +792,23 @@ export default function OnboardingApp({ formToken }) {
       
       // Create real form link via API
       try {
+        const payload = { domain, clientName: result.name || domain, clientData, competitors: formattedCompetitors };
+        console.log('[Frontend] Creating form link with payload:', { domain: payload.domain, hasClientData: !!payload.clientData, clientDataKeys: payload.clientData ? Object.keys(payload.clientData) : [], competitorCount: payload.competitors.length });
         const formRes = await fetch(`${API_URL}/api/form/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain, clientName: result.name || domain, clientData, competitors: formattedCompetitors })
+          body: JSON.stringify(payload)
         });
+        console.log('[Frontend] form/create response:', formRes.status);
         if (formRes.ok) {
           const formData = await formRes.json();
           setShareLink(`${window.location.origin}/form/${formData.token}`);
+        } else {
+          const errText = await formRes.text();
+          console.error('[Frontend] form/create failed:', formRes.status, errText);
         }
       } catch (e) {
-        console.warn('Form link creation failed:', e.message);
+        console.error('[Frontend] Form link creation error:', e.message);
       }
 
     } catch (error) {
@@ -794,60 +819,45 @@ export default function OnboardingApp({ formToken }) {
     setLoading(false);
   };
   
-  // Fetch blog posts AND sitemap data for the client (called when entering step 2)
-  const fetchBlogPosts = async () => {
-    if (!clientData?.domain) return;
-    
-    setLoading(true);
-    setLoadMsg('Scraping blog posts and sitemap...');
-    
-    try {
-      // Fetch blogs and sitemap in parallel
-      const [blogsResponse, sitemapResponse] = await Promise.all([
-        fetch(`${API_URL}/api/blogs`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain: clientData.domain, limit: 20 })
-        }),
-        fetch(`${API_URL}/api/sitemap`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain: clientData.domain })
-        })
-      ]);
-      
-      // Handle sitemap data
-      if (sitemapResponse.ok) {
-        const sitemapResult = await sitemapResponse.json();
-        console.log('[Frontend] Sitemap data:', sitemapResult);
-        setSitemapData(sitemapResult);
-      }
-      
-      if (blogsResponse.ok) {
-        const blogsResult = await blogsResponse.json();
-        const blogPosts = blogsResult.blogPosts || [];
-        console.log(`[Frontend] Fetched ${blogPosts.length} real blog posts`);
-        
-        if (blogPosts.length > 0) {
-          setClientData(prev => ({ ...prev, blogPosts }));
-        } else {
-          // Fallback to mock if no posts found
-          console.log('[Frontend] No blog posts found, using mock data');
-          setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
-        }
-      }
-    } catch (error) {
-      console.error('Blog scraping failed:', error);
-      setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
-    }
-    
-    setLoading(false);
-  };
-
   // Admin: launch client view to preview
   const openClientView = () => {
     setMode('client');
     setClientStep(1);
+  };
+
+  // Reusable: fetch blog posts for the client domain
+  const fetchBlogs = async () => {
+    setBlogError(null);
+    setLoadMsg('Fetching blog posts...');
+    try {
+      const blogsResponse = await fetch(`${API_URL}/api/blogs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: clientData.domain, limit: 20 })
+      });
+      if (blogsResponse.ok) {
+        const blogsResult = await blogsResponse.json();
+        if (blogsResult.blogPosts?.length > 0) {
+          setClientData(prev => ({ ...prev, blogPosts: blogsResult.blogPosts }));
+          console.log(`[Frontend] Fetched ${blogsResult.blogPosts.length} blog posts`);
+          return true;
+        }
+      }
+      const errorData = !blogsResponse.ok ? await blogsResponse.json().catch(() => ({})) : {};
+      setBlogError(errorData.details || 'No blog posts found. AI could not find content for this domain.');
+      return false;
+    } catch (error) {
+      console.error('Blog fetch failed:', error);
+      setBlogError(`Blog fetch failed: ${error.message}`);
+      return false;
+    }
+  };
+
+  // Retry blogs from step 2 UI
+  const retryBlogs = async () => {
+    setLoading(true);
+    await fetchBlogs();
+    setLoading(false);
   };
 
   // Client: crawl competitors AND fetch blog posts for step 2
@@ -891,44 +901,17 @@ export default function OnboardingApp({ formToken }) {
             };
             setCompData(p => ({ ...p, [c.domain]: compClientData }));
           } else {
-            // Fallback to mock data
             setCompData(p => ({ ...p, [c.domain]: generateEmptyFallback(c.domain) }));
           }
         } catch (error) {
           console.error(`Error analyzing ${c.domain}:`, error);
-          // Fallback to mock data
           setCompData(p => ({ ...p, [c.domain]: generateEmptyFallback(c.domain) }));
         }
       }
     }
     
-    // Step 2: Fetch blog posts for the client (needed for style selection)
-    setLoadMsg('Scraping your blog posts for style selection...');
-    try {
-      const blogsResponse = await fetch(`${API_URL}/api/blogs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: clientData.domain, limit: 20 })
-      });
-      
-      if (blogsResponse.ok) {
-        const blogsResult = await blogsResponse.json();
-        const blogPosts = blogsResult.blogPosts || [];
-        console.log(`[Frontend] Fetched ${blogPosts.length} real blog posts`);
-        
-        if (blogPosts.length > 0) {
-          setClientData(prev => ({ ...prev, blogPosts }));
-        } else {
-          console.log('[Frontend] No blog posts found, using mock data');
-          setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
-        }
-      } else {
-        setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
-      }
-    } catch (error) {
-      console.error('Blog scraping failed:', error);
-      setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
-    }
+    // Step 2: Fetch blog posts (uses Gemini → OpenAI web search → error)
+    await fetchBlogs();
     
     setLoading(false);
     setClientStep(2);
@@ -1003,6 +986,19 @@ export default function OnboardingApp({ formToken }) {
     );
   }
 
+  // ========== FORM ERROR ==========
+  if (formError) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-stone-800 mb-2">Link Expired</h2>
+          <p className="text-stone-500">{formError}</p>
+        </div>
+      </div>
+    );
+  }
+
   // ========== ADMIN MODE ==========
   if (mode === 'admin') {
     return (
@@ -1047,7 +1043,7 @@ export default function OnboardingApp({ formToken }) {
                   <Check className="w-10 h-10 text-emerald-600" />
                 </div>
                 <h2 className="text-3xl font-bold text-stone-800 mb-3">Client Created</h2>
-                <p className="text-stone-500 text-lg">Share this link with <span className="font-semibold text-stone-700">{clientData.name}</span> so they can complete onboarding</p>
+                <p className="text-stone-500 text-lg">Share this link with <span className="font-semibold text-stone-700 inline-flex items-center gap-1.5"><img src={favicon(clientData.domain)} width={18} height={18} alt="" className="rounded inline-block" />{clientData.name}</span> so they can complete onboarding</p>
               </div>
 
               {/* Share Link Card */}
@@ -1134,7 +1130,7 @@ export default function OnboardingApp({ formToken }) {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-stone-800 rounded-lg flex items-center justify-center"><span className="text-white font-bold">B</span></div>
             <div>
-              <h1 className="font-semibold text-stone-800">Welcome, {clientData?.name || 'Client'}</h1>
+              <h1 className="font-semibold text-stone-800 flex items-center gap-2">{clientData?.domain && <img src={favicon(clientData.domain)} width={20} height={20} alt="" className="rounded" />}Welcome, {clientData?.name || 'Client'}</h1>
               <p className="text-stone-500 text-xs">Complete your onboarding — powered by Be The Answer</p>
             </div>
           </div>
@@ -1176,7 +1172,7 @@ export default function OnboardingApp({ formToken }) {
                 <h3 className="font-medium mb-4">Detected Competitors</h3>
                 {competitors.map((c, i) => (
                   <div key={i} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg mb-2">
-                    <div className="flex items-center gap-3"><Building className="w-5 h-5 text-stone-400" /><div><p className="font-medium">{c.name}</p><p className="text-xs text-stone-400">{c.domain}</p></div></div>
+                    <div className="flex items-center gap-3"><img src={favicon(c.domain)} width={24} height={24} alt="" className="rounded" /><div><p className="font-medium">{c.name}</p><p className="text-xs text-stone-400">{c.domain}</p></div></div>
                     <button onClick={() => setCompetitors(competitors.filter((_, idx) => idx !== i))} className="text-stone-400 hover:text-rose-500"><Trash className="w-4 h-4" /></button>
                   </div>
                 ))}
@@ -1207,7 +1203,23 @@ export default function OnboardingApp({ formToken }) {
               <p className="text-stone-500">Swipe right on blog posts whose style you'd like us to replicate</p>
             </div>
             <div className="bg-white rounded-xl border p-6 mb-6">
-              <StyleSelection blogPosts={clientData.blogPosts} onComplete={() => setClientStep(3)} likedPosts={likedPosts} setLikedPosts={setLikedPosts} />
+              {blogError ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-stone-800 mb-2">Could not load blog posts</h3>
+                  <p className="text-stone-500 text-sm mb-6 max-w-md mx-auto">{blogError}</p>
+                  <button onClick={retryBlogs} disabled={loading} className="px-6 py-2.5 bg-stone-800 text-white rounded-lg font-medium flex items-center gap-2 mx-auto disabled:bg-stone-400">
+                    {loading ? <><Loader className="w-4 h-4" />{loadMsg}</> : <><RotateCcw className="w-4 h-4" />Retry</>}
+                  </button>
+                </div>
+              ) : clientData.blogPosts?.length > 0 ? (
+                <StyleSelection blogPosts={clientData.blogPosts} onComplete={() => setClientStep(3)} likedPosts={likedPosts} setLikedPosts={setLikedPosts} />
+              ) : (
+                <div className="text-center py-12">
+                  <Loader className="w-8 h-8 text-stone-400 mx-auto mb-4 animate-spin" />
+                  <p className="text-stone-500">Loading blog posts...</p>
+                </div>
+              )}
             </div>
             <div className="bg-white rounded-xl border p-6">
               <div className="flex items-center gap-2 mb-4"><Link className="w-5 h-5 text-stone-400" /><h4 className="font-medium text-sm">Custom Reference URLs</h4></div>
