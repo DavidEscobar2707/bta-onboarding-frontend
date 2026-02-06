@@ -666,9 +666,9 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
 
 
 // === MAIN APP ===
-export default function OnboardingApp() {
-  // mode: 'admin' (BTA team) or 'client' (shared link)
-  const [mode, setMode] = useState('admin');
+export default function OnboardingApp({ formToken }) {
+  // mode: 'admin' (BTA team) or 'client' (shared link via formToken)
+  const [mode, setMode] = useState(formToken ? 'client' : 'admin');
   const [domain, setDomain] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadMsg, setLoadMsg] = useState('');
@@ -686,6 +686,23 @@ export default function OnboardingApp() {
 
   // Client flow steps: 1=Competitors, 2=Style, 3=DataReview, 4=Submit
   const [clientStep, setClientStep] = useState(1);
+  const [formLoading, setFormLoading] = useState(!!formToken);
+
+  // If opened via form link, load pre-scraped data from backend
+  useEffect(() => {
+    if (!formToken) return;
+    fetch(`${API_URL}/api/form/${formToken}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success' && data.clientData) {
+          setClientData(data.clientData);
+          setCompetitors(data.competitors || []);
+          setDomain(data.domain);
+        }
+        setFormLoading(false);
+      })
+      .catch(() => setFormLoading(false));
+  }, [formToken]);
 
   // Admin: crawl domain - FAST version (no blog scraping yet)
   const crawl = async () => {
@@ -759,7 +776,7 @@ export default function OnboardingApp() {
         const formRes = await fetch(`${API_URL}/api/form/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain, clientName: result.name || domain })
+          body: JSON.stringify({ domain, clientName: result.name || domain, clientData, competitors: formattedCompetitors })
         });
         if (formRes.ok) {
           const formData = await formRes.json();
@@ -974,6 +991,18 @@ export default function OnboardingApp() {
     { n: 4, l: 'Submit' },
   ];
 
+  // ========== FORM LOADING ==========
+  if (formLoading) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-10 h-10 text-stone-400 mx-auto mb-4" />
+          <p className="text-stone-500">Loading your onboarding data...</p>
+        </div>
+      </div>
+    );
+  }
+
   // ========== ADMIN MODE ==========
   if (mode === 'admin') {
     return (
@@ -1109,7 +1138,7 @@ export default function OnboardingApp() {
               <p className="text-stone-500 text-xs">Complete your onboarding — powered by Be The Answer</p>
             </div>
           </div>
-          {mode === 'client' && (
+          {mode === 'client' && !formToken && (
             <button onClick={() => setMode('admin')} className="text-xs text-stone-400 hover:text-stone-600 px-3 py-1.5 rounded border border-stone-200 hover:border-stone-300">
               ← Back to Admin
             </button>
