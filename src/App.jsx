@@ -763,7 +763,7 @@ export default function OnboardingApp() {
         });
         if (formRes.ok) {
           const formData = await formRes.json();
-          setShareLink(formData.formUrl);
+          setShareLink(`${window.location.origin}/form/${formData.token}`);
         }
       } catch (e) {
         console.warn('Form link creation failed:', e.message);
@@ -771,23 +771,7 @@ export default function OnboardingApp() {
 
     } catch (error) {
       console.error('Error crawling domain:', error);
-      setLoadMsg('Error: Using fallback data...');
-      await new Promise(r => setTimeout(r, 1000));
-      const data = generateEmptyFallback(domain);
-      setClientData(data);
-      setCompetitors([]);
-      // Still create form link even on fallback
-      try {
-        const formRes = await fetch(`${API_URL}/api/form/create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain, clientName: domain })
-        });
-        if (formRes.ok) {
-          const formData = await formRes.json();
-          setShareLink(formData.formUrl);
-        }
-      } catch (e) { /* ignore */ }
+      alert(`Failed to analyze ${domain}. Please check the domain and try again.`);
     }
     
     setLoading(false);
