@@ -795,19 +795,40 @@ export default function OnboardingApp() {
         setCompetitors([]);
       }
       
-      const fakeId = Math.random().toString(36).substring(2, 10);
-      setShareLink(`https://app.betheanswer.online/onboard/${fakeId}`);
-      
+      // Create real form link via API
+      try {
+        const formRes = await fetch(`${API_URL}/api/form/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain, clientName: result.name || domain })
+        });
+        if (formRes.ok) {
+          const formData = await formRes.json();
+          setShareLink(formData.formUrl);
+        }
+      } catch (e) {
+        console.warn('Form link creation failed:', e.message);
+      }
+
     } catch (error) {
       console.error('Error crawling domain:', error);
       setLoadMsg('Error: Using fallback data...');
       await new Promise(r => setTimeout(r, 1000));
-      // Fallback to mock data if API fails
       const data = generateMockData(domain);
       setClientData(data);
       setCompetitors([]);
-      const fakeId = Math.random().toString(36).substring(2, 10);
-      setShareLink(`https://app.betheanswer.online/onboard/${fakeId}`);
+      // Still create form link even on fallback
+      try {
+        const formRes = await fetch(`${API_URL}/api/form/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain, clientName: domain })
+        });
+        if (formRes.ok) {
+          const formData = await formRes.json();
+          setShareLink(formData.formUrl);
+        }
+      } catch (e) { /* ignore */ }
     }
     
     setLoading(false);
@@ -1069,7 +1090,7 @@ export default function OnboardingApp() {
                     {copied ? <><Check className="w-4 h-4" />Copied</> : <><Copy className="w-4 h-4" />Copy</>}
                   </button>
                 </div>
-                <p className="text-sm text-stone-500">The client will be able to confirm competitors, choose content style, review all data, and submit back to you.</p>
+                <p className="text-sm text-stone-500">The client will fill out a form with their company info, competitors, and content preferences. Data goes directly to Airtable.</p>
               </div>
 
               {/* What they'll see */}
