@@ -34,8 +34,8 @@ const Share2 = ({ className }) => (<svg className={className} viewBox="0 0 24 24
 const ExternalLink = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>);
 const Clock = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
 
-// Platform icon via Google Favicon API (direct gstatic URL, no redirect)
-const favicon = (domain) => `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}&size=32`;
+// Platform icon via Google S2 Favicon API
+const favicon = (domain) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 const PlatformIcon = ({ domain, size = 20, className }) => (
   <img src={favicon(domain)} width={size} height={size} className={className} alt="" style={{ borderRadius: 3, display: 'block' }} />
 );
@@ -88,61 +88,20 @@ const COMPLIANCE_BADGES = [
   { id: 'pci', label: 'PCI DSS', desc: 'Level 1' },
 ];
 
-const generateMockData = (domain) => {
+// Empty fallback data - no fake/invented info, only structure
+const generateEmptyFallback = (domain) => {
   const name = domain.replace(/\.(com|io|co|net|org).*/, '').replace(/^www\./, '');
   const cap = name.charAt(0).toUpperCase() + name.slice(1);
   return {
     domain, name: cap,
     data: {
-      usp: `${cap} provides enterprise-grade solutions that help modern teams collaborate 40% faster with AI-powered workflows.`,
-      icp: 'Mid-market to Enterprise B2B SaaS companies, 50-500 employees, Product & Engineering teams',
-      tone: 'Professional yet approachable. Clear, jargon-free language. Confident but not arrogant.',
-      about: `Founded in 2019, ${cap} has grown to serve over 2,000 customers worldwide. Headquartered in San Francisco with remote teams across 12 countries.`,
-      features: ['Real-time collaboration', 'Advanced analytics dashboard', 'Custom integrations API', 'Role-based permissions', 'Audit logging', 'SSO & SAML support', 'Webhooks', 'Mobile app'],
-      integrations: ['Salesforce', 'HubSpot', 'Slack', 'Zapier', 'Jira', 'GitHub', 'Notion', 'Linear'],
-      pricing: [
-        { tier: 'Starter', price: '29', period: '/month', features: ['5 users', '10 projects', 'Basic analytics'] },
-        { tier: 'Pro', price: '99', period: '/month', features: ['25 users', 'Unlimited projects', 'Advanced analytics', 'API access'] },
-        { tier: 'Enterprise', price: 'Custom', period: '', features: ['Unlimited users', 'Custom SLA', 'Dedicated support', 'SSO'] },
-      ],
-      roadmap: 'Q1 2026: AI copilot, Mobile redesign. Q2 2026: Enterprise dashboard, Audit logs v2.',
-      limitations: ['No offline mode', '10k record limit on Starter plan', 'No white-labeling on Pro tier', 'API rate limits: 100 req/min'],
-      techStack: ['React', 'Node.js', 'PostgreSQL', 'AWS', 'Kubernetes', 'Redis'],
-      support: 'Standard: 9am-6pm EST. Enterprise: 24/7 support. Response time: under 4 hours.',
-      contact: [
-        { label: 'Support Email', value: `support@${domain}`, icon: 'mail' },
-        { label: 'Sales Email', value: `sales@${domain}`, icon: 'briefcase' },
-        { label: 'Phone', value: '+1 (555) 123-4567', icon: 'phone' },
-      ],
-      founders: [
-        { name: 'Jane Smith', role: 'CEO', background: 'Ex-Google, Stanford MBA' },
-        { name: 'John Doe', role: 'CTO', background: 'Ex-Stripe, MIT CS' },
-      ],
-      teamSize: '75 total — 30 Engineering, 15 Sales, 10 Support, 20 Other',
-      funding: 'Series B — $45M raised. Investors: Sequoia, a16z, Index Ventures.',
-      compliance: ['soc2', 'gdpr', 'ccpa'],
-      reviews: [
-        { platform: 'G2', score: '4.6', count: '234' },
-        { platform: 'Capterra', score: '4.5', count: '89' },
-      ],
-      caseStudies: [
-        { company: 'Acme Corp', result: '40% efficiency gain', industry: 'Manufacturing', link: `https://${domain}/case-studies/acme` },
-        { company: 'TechStart', result: '3x faster onboarding', industry: 'SaaS', link: `https://${domain}/case-studies/techstart` },
-      ],
-      guarantees: '99.9% uptime SLA. 30-day money-back guarantee. Enterprise SLA available.',
-      partnerships: ['AWS Partner', 'Salesforce AppExchange', 'Google Cloud Partner'],
-      social: { twitter: '@' + name, linkedin: '/company/' + name, youtube: '', github: '/' + name, facebook: '', instagram: '', threads: '', bluesky: '', tiktok: '', medium: '', substack: '', podcast: '', pinterest: '', dribbble: '', producthunt: '', discord: '', slack: '', reddit: '', g2: `https://www.g2.com/products/${name}`, capterra: '', trustpilot: '', glassdoor: '', yelp: '', bbb: '', crunchbase: `https://www.crunchbase.com/organization/${name}`, wikipedia: '', googlebiz: '', angellist: '', appstore: '', playstore: '' },
-      contentThemes: ['Product updates', 'Industry insights', 'Customer success', 'Engineering blog'],
-      segments: ['SaaS', 'FinTech', 'Healthcare Tech', 'E-commerce'],
-      changelog: 'Weekly releases. Last update: Jan 28, 2026 — Performance improvements & new API endpoints.',
+      usp: '', icp: '', tone: '', about: '', features: [], integrations: [],
+      pricing: [], limitations: [], techStack: [], support: '', contact: [],
+      founders: [], compliance: [], reviews: [], caseStudies: [],
+      social: {}, contentThemes: [], segments: [], partnerships: [],
+      roadmap: '', funding: '', teamSize: '', guarantees: '', changelog: '',
     },
-    blogPosts: [
-      { id: 1, title: 'How We Scaled to 10,000 Users', date: '2026-01-15', image: 'https://picsum.photos/seed/b1/800/400', description: 'Our journey from startup to scale-up.', body: 'When we first launched, we had no idea we would serve 10,000 users within a year...' },
-      { id: 2, title: 'The Future of B2B Collaboration', date: '2026-01-08', image: 'https://picsum.photos/seed/b2/800/400', description: 'Remote work demands new tools.', body: 'The B2B collaboration landscape is transforming...' },
-      { id: 3, title: '5 Mistakes When Choosing SaaS', date: '2025-12-20', image: 'https://picsum.photos/seed/b3/800/400', description: 'Common mistakes and how to avoid them.', body: 'After working with thousands of customers...' },
-      { id: 4, title: 'Customer Spotlight: Acme Corp', date: '2025-12-10', image: 'https://picsum.photos/seed/b4/800/400', description: 'How Acme transformed operations.', body: 'Acme Corp was struggling with efficiency...' },
-      { id: 5, title: 'New Analytics Dashboard', date: '2025-11-28', image: 'https://picsum.photos/seed/b5/800/400', description: 'Redesigned with real-time insights.', body: 'Today we announce our biggest update...' },
-    ]
+    blogPosts: [],
   };
 };
 
@@ -814,7 +773,7 @@ export default function OnboardingApp() {
       console.error('Error crawling domain:', error);
       setLoadMsg('Error: Using fallback data...');
       await new Promise(r => setTimeout(r, 1000));
-      const data = generateMockData(domain);
+      const data = generateEmptyFallback(domain);
       setClientData(data);
       setCompetitors([]);
       // Still create form link even on fallback
@@ -873,12 +832,12 @@ export default function OnboardingApp() {
         } else {
           // Fallback to mock if no posts found
           console.log('[Frontend] No blog posts found, using mock data');
-          setClientData(prev => ({ ...prev, blogPosts: generateMockData(clientData.domain).blogPosts }));
+          setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
         }
       }
     } catch (error) {
       console.error('Blog scraping failed:', error);
-      setClientData(prev => ({ ...prev, blogPosts: generateMockData(clientData.domain).blogPosts }));
+      setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
     }
     
     setLoading(false);
@@ -932,12 +891,12 @@ export default function OnboardingApp() {
             setCompData(p => ({ ...p, [c.domain]: compClientData }));
           } else {
             // Fallback to mock data
-            setCompData(p => ({ ...p, [c.domain]: generateMockData(c.domain) }));
+            setCompData(p => ({ ...p, [c.domain]: generateEmptyFallback(c.domain) }));
           }
         } catch (error) {
           console.error(`Error analyzing ${c.domain}:`, error);
           // Fallback to mock data
-          setCompData(p => ({ ...p, [c.domain]: generateMockData(c.domain) }));
+          setCompData(p => ({ ...p, [c.domain]: generateEmptyFallback(c.domain) }));
         }
       }
     }
@@ -960,14 +919,14 @@ export default function OnboardingApp() {
           setClientData(prev => ({ ...prev, blogPosts }));
         } else {
           console.log('[Frontend] No blog posts found, using mock data');
-          setClientData(prev => ({ ...prev, blogPosts: generateMockData(clientData.domain).blogPosts }));
+          setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
         }
       } else {
-        setClientData(prev => ({ ...prev, blogPosts: generateMockData(clientData.domain).blogPosts }));
+        setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
       }
     } catch (error) {
       console.error('Blog scraping failed:', error);
-      setClientData(prev => ({ ...prev, blogPosts: generateMockData(clientData.domain).blogPosts }));
+      setClientData(prev => ({ ...prev, blogPosts: generateEmptyFallback(clientData.domain).blogPosts }));
     }
     
     setLoading(false);
