@@ -488,6 +488,7 @@ const ElevenLabsCall = ({ clientData, onComplete, onTranscriptUpdate }) => {
   const [error, setError] = useState(null);
   const [callStartTime, setCallStartTime] = useState(null);
   const conversationRef = React.useRef(null);
+  const transcriptRef = React.useRef([]); // Ref to always have latest transcript
 
   // Icon components for this section
   const Mic = ({ className }) => (
@@ -555,10 +556,15 @@ const ElevenLabsCall = ({ clientData, onComplete, onTranscriptUpdate }) => {
         onMessage: (message) => {
           console.log('[ElevenLabs] Message:', message);
           if (message.message) {
-            setTranscript(prev => [...prev, {
+            const newMsg = {
               role: message.source === 'user' ? 'user' : 'agent',
               text: message.message
-            }]);
+            };
+            setTranscript(prev => {
+              const updated = [...prev, newMsg];
+              transcriptRef.current = updated; // Keep ref in sync
+              return updated;
+            });
           }
         },
         onError: (err) => {
@@ -581,9 +587,11 @@ const ElevenLabsCall = ({ clientData, onComplete, onTranscriptUpdate }) => {
       await conversationRef.current.endSession();
       conversationRef.current = null;
     }
-    // Pass transcript data to parent
+    // Pass transcript data to parent - use ref to get latest
     if (onTranscriptUpdate) {
-      onTranscriptUpdate({ transcript, completed: true, duration });
+      const latestTranscript = transcriptRef.current;
+      console.log('[ElevenLabs] Sending transcript:', latestTranscript.length, 'messages, duration:', duration);
+      onTranscriptUpdate({ transcript: latestTranscript, completed: true, duration });
     }
     setStatus('ended');
   };
