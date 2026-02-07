@@ -4,35 +4,35 @@ import React, { useState, useEffect } from 'react';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Icons
-const Globe = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>);
-const Search = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
-const Building = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/></svg>);
-const Users = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>);
-const Check = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>);
-const Plus = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
-const Trash = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>);
-const Loader = ({ className }) => (<svg className={`${className} animate-spin`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>);
-const Palette = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"/></svg>);
-const Link = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>);
-const XIcon = ({ className, ...props }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
-const Heart = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>);
-const RotateCcw = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>);
-const Star = ({ className, filled }) => (<svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
-const Mail = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>);
-const Phone = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>);
-const DollarSign = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>);
-const Shield = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
-const Edit3 = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>);
-const Zap = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>);
-const AlertCircle = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>);
-const Briefcase = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>);
-const Award = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>);
-const Copy = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>);
-const Send = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>);
-const ArrowRight = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>);
-const Share2 = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>);
-const ExternalLink = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>);
-const Clock = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
+const Globe = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>);
+const Search = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>);
+const Building = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 22v-4h6v4" /></svg>);
+const Users = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>);
+const Check = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>);
+const Plus = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>);
+const Trash = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>);
+const Loader = ({ className }) => (<svg className={`${className} animate-spin`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>);
+const Palette = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="13.5" cy="6.5" r=".5" /><circle cx="17.5" cy="10.5" r=".5" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z" /></svg>);
+const Link = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>);
+const XIcon = ({ className, ...props }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>);
+const Heart = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>);
+const RotateCcw = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>);
+const Star = ({ className, filled }) => (<svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>);
+const Mail = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>);
+const Phone = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>);
+const DollarSign = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>);
+const Shield = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>);
+const Edit3 = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>);
+const Zap = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>);
+const AlertCircle = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>);
+const Briefcase = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>);
+const Award = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>);
+const Copy = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>);
+const Send = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>);
+const ArrowRight = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>);
+const Share2 = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>);
+const ExternalLink = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>);
+const Clock = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>);
 
 // Platform icon via Google S2 Favicon API
 const favicon = (domain) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -109,7 +109,7 @@ const generateEmptyFallback = (domain) => {
 
 const ProgressBar = ({ current, total }) => (
   <div className="w-full bg-stone-200 rounded-full h-2">
-    <div className="bg-stone-800 h-2 rounded-full transition-all" style={{ width: `${(current/total)*100}%` }}/>
+    <div className="bg-stone-800 h-2 rounded-full transition-all" style={{ width: `${(current / total) * 100}%` }} />
   </div>
 );
 
@@ -287,7 +287,7 @@ const ReviewScores = ({ reviews, onChange }) => {
           <div key={i} className="p-4 bg-stone-50 rounded-xl group cursor-pointer" onClick={() => { setEditIdx(i); setDraft(r); }}>
             <div className="flex items-center justify-between"><p className="text-xs font-medium text-stone-500 uppercase tracking-wide">{r.platform}</p><Edit3 className="w-3.5 h-3.5 text-stone-400 opacity-0 group-hover:opacity-100" /></div>
             <div className="flex items-baseline gap-1 mt-1"><span className="text-3xl font-bold text-stone-800">{r.score}</span><span className="text-stone-400">/5</span></div>
-            <div className="flex gap-0.5 mt-1">{[1,2,3,4,5].map(s => <Star key={s} filled={s <= Math.round(parseFloat(r.score))} className={`w-4 h-4 ${s <= Math.round(parseFloat(r.score)) ? 'text-amber-400' : 'text-stone-300'}`} />)}</div>
+            <div className="flex gap-0.5 mt-1">{[1, 2, 3, 4, 5].map(s => <Star key={s} filled={s <= Math.round(parseFloat(r.score))} className={`w-4 h-4 ${s <= Math.round(parseFloat(r.score)) ? 'text-amber-400' : 'text-stone-300'}`} />)}</div>
             <p className="text-xs text-stone-500 mt-1">{r.count} reviews</p>
           </div>
         ))}
@@ -428,13 +428,13 @@ const TinderCard = ({ post, onSwipe, style, isActive }) => {
   const handleEnd = () => { if (!isDragging || !isActive) return; setIsDragging(false); if (offsetX > 120) onSwipe('right'); else if (offsetX < -120) onSwipe('left'); setOffsetX(0); };
   const rot = isActive ? offsetX * 0.08 : 0;
   return (
-    <div className="absolute w-full h-full select-none" style={{ ...style, transform: `${style?.transform||''} translateX(${isActive?offsetX:0}px) rotate(${rot}deg)`, transition: isDragging ? 'none' : 'transform 0.3s', cursor: isActive ? 'grab' : 'default' }}
+    <div className="absolute w-full h-full select-none" style={{ ...style, transform: `${style?.transform || ''} translateX(${isActive ? offsetX : 0}px) rotate(${rot}deg)`, transition: isDragging ? 'none' : 'transform 0.3s', cursor: isActive ? 'grab' : 'default' }}
       onMouseDown={e => handleStart(e.clientX)} onMouseMove={e => handleMove(e.clientX)} onMouseUp={handleEnd} onMouseLeave={handleEnd}
       onTouchStart={e => handleStart(e.touches[0].clientX)} onTouchMove={e => handleMove(e.touches[0].clientX)} onTouchEnd={handleEnd}>
       <div className="w-full h-full bg-white rounded-2xl shadow-2xl overflow-hidden border">
         {isActive && <>
-          <div className="absolute top-6 left-6 z-20 px-4 py-2 border-4 border-emerald-500 rounded-xl -rotate-12 pointer-events-none" style={{ opacity: Math.max(0, offsetX/100) }}><span className="text-emerald-500 font-black text-3xl">LIKE</span></div>
-          <div className="absolute top-6 right-6 z-20 px-4 py-2 border-4 border-rose-500 rounded-xl rotate-12 pointer-events-none" style={{ opacity: Math.max(0, -offsetX/100) }}><span className="text-rose-500 font-black text-3xl">NOPE</span></div>
+          <div className="absolute top-6 left-6 z-20 px-4 py-2 border-4 border-emerald-500 rounded-xl -rotate-12 pointer-events-none" style={{ opacity: Math.max(0, offsetX / 100) }}><span className="text-emerald-500 font-black text-3xl">LIKE</span></div>
+          <div className="absolute top-6 right-6 z-20 px-4 py-2 border-4 border-rose-500 rounded-xl rotate-12 pointer-events-none" style={{ opacity: Math.max(0, -offsetX / 100) }}><span className="text-rose-500 font-black text-3xl">NOPE</span></div>
         </>}
         <div className="h-44 bg-stone-200 relative"><img src={post.image} alt="" className="w-full h-full object-cover" draggable={false} /><div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" /><div className="absolute bottom-4 left-4 right-4"><p className="text-white/70 text-sm">{post.date}</p><h3 className="text-white font-bold text-xl">{post.title}</h3></div></div>
         <div className="p-4 border-b"><p className="text-stone-600 text-sm">{post.description}</p></div>
@@ -457,7 +457,7 @@ const StyleSelection = ({ blogPosts, onComplete, likedPosts, setLikedPosts }) =>
     <div className="text-center py-8">
       <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6"><Check className="w-10 h-10 text-emerald-600" /></div>
       <h3 className="text-2xl font-bold mb-2">Done! Liked {likedPosts.length} posts</h3>
-      {likedPosts.length > 0 && <div className="max-w-md mx-auto mb-6 text-left">{likedPosts.map(p => <div key={p.id} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg mb-2"><svg className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span className="text-sm">{p.title}</span></div>)}</div>}
+      {likedPosts.length > 0 && <div className="max-w-md mx-auto mb-6 text-left">{likedPosts.map(p => <div key={p.id} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg mb-2"><svg className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg><span className="text-sm">{p.title}</span></div>)}</div>}
       <div className="flex gap-3 justify-center">
         <button onClick={() => { setIdx(0); setLikedPosts([]); setDone(false); }} className="px-4 py-2 border rounded-lg flex items-center gap-2"><RotateCcw className="w-4 h-4" />Redo</button>
         <button onClick={onComplete} className="px-6 py-2 bg-stone-800 text-white rounded-lg font-medium">Continue</button>
@@ -466,9 +466,9 @@ const StyleSelection = ({ blogPosts, onComplete, likedPosts, setLikedPosts }) =>
   );
   return (
     <div>
-      <div className="mb-6"><div className="flex justify-between text-sm mb-2"><span className="text-stone-600">Reviewing posts</span><span className="font-semibold">{idx+1} / {blogPosts.length}</span></div><ProgressBar current={idx+1} total={blogPosts.length} /></div>
+      <div className="mb-6"><div className="flex justify-between text-sm mb-2"><span className="text-stone-600">Reviewing posts</span><span className="font-semibold">{idx + 1} / {blogPosts.length}</span></div><ProgressBar current={idx + 1} total={blogPosts.length} /></div>
       <div className="relative h-[520px] w-full max-w-md mx-auto mb-8">
-        {blogPosts.map((p, i) => { if (i < idx || i > idx + 1) return null; const active = i === idx; const ex = exiting?.i === i; let s = {}; if (ex) s = { transform: `translateX(${exiting.dir==='right'?500:-500}px) rotate(${exiting.dir==='right'?30:-30}deg)`, opacity: 0, zIndex: 10 }; else if (active) s = { zIndex: 10 }; else s = { transform: 'scale(0.95) translateY(20px)', zIndex: 5, opacity: 0.7 }; return <TinderCard key={p.id} post={p} onSwipe={swipe} style={s} isActive={active && !ex} />; })}
+        {blogPosts.map((p, i) => { if (i < idx || i > idx + 1) return null; const active = i === idx; const ex = exiting?.i === i; let s = {}; if (ex) s = { transform: `translateX(${exiting.dir === 'right' ? 500 : -500}px) rotate(${exiting.dir === 'right' ? 30 : -30}deg)`, opacity: 0, zIndex: 10 }; else if (active) s = { zIndex: 10 }; else s = { transform: 'scale(0.95) translateY(20px)', zIndex: 5, opacity: 0.7 }; return <TinderCard key={p.id} post={p} onSwipe={swipe} style={s} isActive={active && !ex} />; })}
       </div>
       <div className="flex items-center justify-center gap-6">
         <button onClick={() => swipe('left')} className="w-16 h-16 rounded-full bg-white border-2 border-rose-200 flex items-center justify-center text-rose-500 hover:scale-110 transition-all shadow-lg"><XIcon className="w-8 h-8" strokeWidth={3} /></button>
@@ -480,10 +480,279 @@ const StyleSelection = ({ blogPosts, onComplete, likedPosts, setLikedPosts }) =>
 };
 
 
+// === ELEVEN LABS CONVERSATIONAL AI ===
+const ElevenLabsCall = ({ clientData, onComplete }) => {
+  const [status, setStatus] = useState('idle'); // idle, connecting, connected, ended
+  const [isMuted, setIsMuted] = useState(false);
+  const [transcript, setTranscript] = useState([]);
+  const [error, setError] = useState(null);
+  const conversationRef = React.useRef(null);
+
+  const AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+
+  // Icon components for this section
+  const Mic = ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  );
+
+  const MicOff = ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+      <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  );
+
+  const PhoneCall = ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+
+  const startConversation = async () => {
+    if (!AGENT_ID) {
+      setError('No se ha configurado VITE_ELEVENLABS_AGENT_ID en las variables de entorno');
+      return;
+    }
+
+    try {
+      setStatus('connecting');
+      setError(null);
+
+      // Request microphone permission
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Dynamic import to avoid SSR issues
+      const { Conversation } = await import('@elevenlabs/client');
+
+      // Build context about the client for the agent
+      const clientContext = `
+Company: ${clientData?.name || 'Unknown'}
+Domain: ${clientData?.domain || 'Unknown'}
+Industry: ${clientData?.data?.industry || 'Not specified'}
+About: ${clientData?.data?.about || 'No description'}
+USP: ${clientData?.data?.usp || 'Not defined'}
+ICP: ${clientData?.data?.icp || 'Not defined'}
+      `.trim();
+
+      conversationRef.current = await Conversation.startSession({
+        agentId: AGENT_ID,
+        overrides: {
+          agent: {
+            firstMessage: `Hola! Soy el asistente de Be The Answer. Veo que estás configurando el onboarding para ${clientData?.name || 'tu empresa'}. Tengo algunas preguntas para completar tu perfil. ¿Estás listo para empezar?`,
+            prompt: {
+              prompt: `You are a helpful onboarding assistant for Be The Answer. You're helping gather additional information about a company. Here's what we already know:\n\n${clientContext}\n\nAsk follow-up questions to fill in any gaps. Focus on: support hours, unique value propositions, ideal customer details, founder backgrounds, and social media presence. Be conversational and friendly. Speak in Spanish.`
+            }
+          }
+        },
+        onConnect: () => {
+          console.log('[ElevenLabs] Connected');
+          setStatus('connected');
+        },
+        onDisconnect: () => {
+          console.log('[ElevenLabs] Disconnected');
+          setStatus('ended');
+        },
+        onMessage: (message) => {
+          console.log('[ElevenLabs] Message:', message);
+          if (message.message) {
+            setTranscript(prev => [...prev, {
+              role: message.source === 'user' ? 'user' : 'agent',
+              text: message.message
+            }]);
+          }
+        },
+        onError: (err) => {
+          console.error('[ElevenLabs] Error:', err);
+          setError(err.message || 'Error en la conexión');
+          setStatus('idle');
+        }
+      });
+
+    } catch (err) {
+      console.error('[ElevenLabs] Start error:', err);
+      setError(err.message || 'No se pudo iniciar la llamada. Verifica tu micrófono.');
+      setStatus('idle');
+    }
+  };
+
+  const endConversation = async () => {
+    if (conversationRef.current) {
+      await conversationRef.current.endSession();
+      conversationRef.current = null;
+    }
+    setStatus('ended');
+  };
+
+  const toggleMute = () => {
+    if (conversationRef.current) {
+      if (isMuted) {
+        conversationRef.current.unmute();
+      } else {
+        conversationRef.current.mute();
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="text-center mb-8">
+        <div className="w-20 h-20 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <PhoneCall className="w-10 h-10 text-violet-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-stone-800 mb-2">Llamada con AI</h2>
+        <p className="text-stone-500">Nuestro asistente te hará algunas preguntas para completar tu perfil</p>
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 text-rose-700">
+            <AlertCircle className="w-5 h-5" />
+            <p className="text-sm">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* No Agent ID warning */}
+      {!AGENT_ID && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 text-amber-700">
+            <AlertCircle className="w-5 h-5" />
+            <div>
+              <p className="text-sm font-medium">Agent ID no configurado</p>
+              <p className="text-xs">Agrega VITE_ELEVENLABS_AGENT_ID a tu archivo .env</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Call interface */}
+      <div className="bg-white rounded-2xl border p-6 mb-6 shadow-sm">
+        {status === 'idle' && (
+          <div className="text-center py-8">
+            <button
+              onClick={startConversation}
+              disabled={!AGENT_ID}
+              className="w-24 h-24 rounded-full bg-violet-500 hover:bg-violet-600 disabled:bg-stone-300 flex items-center justify-center mx-auto mb-4 transition-all hover:scale-105 shadow-lg"
+            >
+              <PhoneCall className="w-12 h-12 text-white" />
+            </button>
+            <p className="text-stone-600 font-medium">Iniciar llamada</p>
+            <p className="text-stone-400 text-sm mt-1">Click para comenzar la conversación</p>
+          </div>
+        )}
+
+        {status === 'connecting' && (
+          <div className="text-center py-8">
+            <div className="w-24 h-24 rounded-full bg-violet-100 flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Loader className="w-12 h-12 text-violet-500" />
+            </div>
+            <p className="text-stone-600 font-medium">Conectando...</p>
+            <p className="text-stone-400 text-sm mt-1">Preparando tu asistente AI</p>
+          </div>
+        )}
+
+        {status === 'connected' && (
+          <div className="py-4">
+            {/* Active call indicator */}
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-emerald-600 font-medium">Llamada activa</span>
+            </div>
+
+            {/* Transcript */}
+            <div className="bg-stone-50 rounded-xl p-4 h-48 overflow-y-auto mb-6">
+              {transcript.length === 0 ? (
+                <p className="text-stone-400 text-sm text-center py-8">Esperando respuesta del asistente...</p>
+              ) : (
+                <div className="space-y-3">
+                  {transcript.map((msg, i) => (
+                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm ${msg.role === 'user'
+                        ? 'bg-violet-500 text-white'
+                        : 'bg-white border text-stone-700'
+                        }`}>
+                        {msg.text}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-center gap-4">
+              <button
+                onClick={toggleMute}
+                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isMuted ? 'bg-rose-100 text-rose-600' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  }`}
+              >
+                {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+              </button>
+              <button
+                onClick={endConversation}
+                className="w-14 h-14 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white transition-all"
+              >
+                <PhoneCall className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {status === 'ended' && (
+          <div className="text-center py-8">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-10 h-10 text-emerald-600" />
+            </div>
+            <h3 className="text-xl font-bold text-stone-800 mb-2">¡Llamada completada!</h3>
+            <p className="text-stone-500 mb-6">Gracias por proporcionar información adicional</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => { setStatus('idle'); setTranscript([]); }}
+                className="px-4 py-2 border rounded-lg flex items-center gap-2 text-stone-600 hover:bg-stone-50"
+              >
+                <RotateCcw className="w-4 h-4" /> Otra llamada
+              </button>
+              <button
+                onClick={onComplete}
+                className="px-6 py-2 bg-stone-800 text-white rounded-lg font-medium flex items-center gap-2"
+              >
+                Continuar <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Skip option */}
+      {status !== 'ended' && (
+        <div className="text-center">
+          <button
+            onClick={onComplete}
+            className="text-stone-400 hover:text-stone-600 text-sm underline"
+          >
+            Saltar este paso
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 // === COMPETITOR READ-ONLY VIEW (for comparison) ===
 const CompetitorReadOnly = ({ data, competitorName, competitorDomain }) => {
   if (!data) return <p className="text-stone-500 text-center py-8">No data available for this competitor</p>;
-  
+
   const ReadOnlySection = ({ label, icon: Icon, children }) => (
     <div className="bg-white rounded-xl border p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -596,14 +865,14 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
   const d = activeTab === 'client' ? clientData?.data : compData[activeTab]?.data;
   const isClient = activeTab === 'client';
   const currentCompetitor = competitors.find(c => c.domain === activeTab);
-  
+
   return (
     <div>
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <button onClick={() => setActiveTab('client')} className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === 'client' ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}`}><img src={favicon(clientData.domain)} width={18} height={18} alt="" className="rounded" />{clientData.name}<span className="ml-1 px-1.5 py-0.5 text-xs rounded bg-emerald-100 text-emerald-700">You</span></button>
         {competitors.map(c => (<button key={c.domain} onClick={() => setActiveTab(c.domain)} className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === c.domain ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}`}><img src={favicon(c.domain)} width={18} height={18} alt="" className="rounded" />{c.name}</button>))}
       </div>
-      
+
       {/* Show editable form ONLY for client, read-only for competitors */}
       {isClient && d && (
         <div className="space-y-6">
@@ -622,8 +891,8 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
             <FounderCards founders={d.founders} onChange={v => updateField('founders', v)} />
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            <TagList label="Features" items={d.features} onChange={v => updateField('features', v)} icon={Zap} suggestions={['Analytics','Reporting','API','Webhooks','Mobile App','Offline Mode','White-label']} />
-            <TagList label="Integrations" items={d.integrations} onChange={v => updateField('integrations', v)} icon={Link} suggestions={['Salesforce','HubSpot','Slack','Zapier','Jira','Notion','Asana','Monday']} />
+            <TagList label="Features" items={d.features} onChange={v => updateField('features', v)} icon={Zap} suggestions={['Analytics', 'Reporting', 'API', 'Webhooks', 'Mobile App', 'Offline Mode', 'White-label']} />
+            <TagList label="Integrations" items={d.integrations} onChange={v => updateField('integrations', v)} icon={Link} suggestions={['Salesforce', 'HubSpot', 'Slack', 'Zapier', 'Jira', 'Notion', 'Asana', 'Monday']} />
           </div>
           <PricingCards pricing={d.pricing} onChange={v => updateField('pricing', v)} />
           <div className="grid md:grid-cols-2 gap-6">
@@ -635,7 +904,7 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <LimitationsList items={d.limitations} onChange={v => updateField('limitations', v)} />
-            <TagList label="Tech Stack" items={d.techStack} onChange={v => updateField('techStack', v)} icon={Zap} suggestions={['React','Vue','Angular','Node.js','Python','Go','AWS','GCP','Azure','Kubernetes','Docker']} />
+            <TagList label="Tech Stack" items={d.techStack} onChange={v => updateField('techStack', v)} icon={Zap} suggestions={['React', 'Vue', 'Angular', 'Node.js', 'Python', 'Go', 'AWS', 'GCP', 'Azure', 'Kubernetes', 'Docker']} />
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <TextBlock label="Funding" value={d.funding} onChange={v => updateField('funding', v)} icon={DollarSign} multiline />
@@ -646,16 +915,16 @@ const DataReview = ({ clientData, compData, competitors, activeTab, setActiveTab
             <TextBlock label="Roadmap" value={d.roadmap} onChange={v => updateField('roadmap', v)} icon={Zap} multiline />
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            <TagList label="Customer Segments" items={d.segments} onChange={v => updateField('segments', v)} icon={Users} suggestions={['SaaS','FinTech','Healthcare','E-commerce','Enterprise','SMB','Education']} />
-            <TagList label="Content Themes" items={d.contentThemes} onChange={v => updateField('contentThemes', v)} icon={Palette} suggestions={['Product updates','Thought leadership','Case studies','Tutorials','Industry news']} />
+            <TagList label="Customer Segments" items={d.segments} onChange={v => updateField('segments', v)} icon={Users} suggestions={['SaaS', 'FinTech', 'Healthcare', 'E-commerce', 'Enterprise', 'SMB', 'Education']} />
+            <TagList label="Content Themes" items={d.contentThemes} onChange={v => updateField('contentThemes', v)} icon={Palette} suggestions={['Product updates', 'Thought leadership', 'Case studies', 'Tutorials', 'Industry news']} />
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            <TagList label="Partnerships" items={d.partnerships} onChange={v => updateField('partnerships', v)} icon={Award} suggestions={['AWS Partner','Google Partner','Salesforce AppExchange','Microsoft Partner']} />
+            <TagList label="Partnerships" items={d.partnerships} onChange={v => updateField('partnerships', v)} icon={Award} suggestions={['AWS Partner', 'Google Partner', 'Salesforce AppExchange', 'Microsoft Partner']} />
             <TextBlock label="Product Updates / Changelog" value={d.changelog} onChange={v => updateField('changelog', v)} icon={Zap} multiline />
           </div>
         </div>
       )}
-      
+
       {/* Read-only view for competitors */}
       {!isClient && (
         <CompetitorReadOnly data={d} competitorName={currentCompetitor?.name || activeTab} competitorDomain={currentCompetitor?.domain || activeTab} />
@@ -728,7 +997,7 @@ export default function OnboardingApp({ formToken }) {
     if (!domain) return;
     setLoading(true);
     setLoadMsg('Analyzing company with AI...');
-    
+
     try {
       // Only call onboard API - this does the AI analysis and discovers competitors
       const onboardResponse = await fetch(`${API_URL}/api/onboard`, {
@@ -736,14 +1005,14 @@ export default function OnboardingApp({ formToken }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain })
       });
-      
+
       if (!onboardResponse.ok) {
         throw new Error('Server error on onboard');
       }
-      
+
       const result = await onboardResponse.json();
       console.log('[Frontend] AI Analysis result:', result);
-      
+
       // Extract competitors from AI response
       const aiCompetitors = result.data?.competitors || [];
       const formattedCompetitors = aiCompetitors.map(c => ({
@@ -751,9 +1020,9 @@ export default function OnboardingApp({ formToken }) {
         name: c.name || c.domain.replace(/\.(com|io|net|org).*/, ''),
         reason: c.reason || ''
       }));
-      
+
       console.log('[Frontend] AI-discovered competitors:', formattedCompetitors);
-      
+
       // Merge API response with required frontend structure
       // Blog posts will be fetched later in client flow (step 2)
       const clientData = {
@@ -779,9 +1048,9 @@ export default function OnboardingApp({ formToken }) {
         },
         blogPosts: [] // Will be fetched in client step 2
       };
-      
+
       setClientData(clientData);
-      
+
       // Use AI-discovered competitors, fallback to defaults if none found
       if (formattedCompetitors.length > 0) {
         setCompetitors(formattedCompetitors);
@@ -789,7 +1058,7 @@ export default function OnboardingApp({ formToken }) {
         console.log('[Frontend] No competitors found by AI, client can add manually');
         setCompetitors([]);
       }
-      
+
       // Create real form link via API
       try {
         const payload = { domain, clientName: result.name || domain, clientData, competitors: formattedCompetitors };
@@ -815,10 +1084,10 @@ export default function OnboardingApp({ formToken }) {
       console.error('Error crawling domain:', error);
       alert(`Failed to analyze ${domain}. Please check the domain and try again.`);
     }
-    
+
     setLoading(false);
   };
-  
+
   // Admin: launch client view to preview
   const openClientView = () => {
     setMode('client');
@@ -863,19 +1132,19 @@ export default function OnboardingApp({ formToken }) {
   // Client: crawl competitors AND fetch blog posts for step 2
   const crawlComps = async () => {
     setLoading(true);
-    
+
     // Step 1: Analyze competitors (if any)
     if (competitors.length > 0) {
       for (const c of competitors) {
         setLoadMsg(`Analyzing competitor: ${c.name}...`);
-        
+
         try {
           const response = await fetch(`${API_URL}/api/onboard`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ domain: c.domain })
           });
-          
+
           if (response.ok) {
             const result = await response.json();
             const compClientData = {
@@ -909,10 +1178,10 @@ export default function OnboardingApp({ formToken }) {
         }
       }
     }
-    
+
     // Step 2: Fetch blog posts (uses Gemini → OpenAI web search → error)
     await fetchBlogs();
-    
+
     setLoading(false);
     setClientStep(2);
   };
@@ -921,7 +1190,7 @@ export default function OnboardingApp({ formToken }) {
   const handleSubmit = async () => {
     setLoading(true);
     setLoadMsg('Submitting to BTA...');
-    
+
     try {
       const response = await fetch(`${API_URL}/api/submit`, {
         method: 'POST',
@@ -935,7 +1204,7 @@ export default function OnboardingApp({ formToken }) {
           sitemapData
         })
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         console.log('[Frontend] Submission successful:', result);
@@ -949,7 +1218,7 @@ export default function OnboardingApp({ formToken }) {
       console.error('[Frontend] Submission error:', error);
       alert('Failed to submit. Please check your connection and try again.');
     }
-    
+
     setLoading(false);
   };
 
@@ -962,7 +1231,7 @@ export default function OnboardingApp({ formToken }) {
   };
 
   const copyLink = () => {
-    try { navigator.clipboard?.writeText(shareLink); } catch(e) {}
+    try { navigator.clipboard?.writeText(shareLink); } catch (e) { }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -970,8 +1239,9 @@ export default function OnboardingApp({ formToken }) {
   const CLIENT_STEPS = [
     { n: 1, l: 'Competitors' },
     { n: 2, l: 'Style' },
-    { n: 3, l: 'Data Review' },
-    { n: 4, l: 'Submit' },
+    { n: 3, l: '11 Labs Call' },
+    { n: 4, l: 'Data Review' },
+    { n: 5, l: 'Submit' },
   ];
 
   // ========== FORM LOADING ==========
@@ -1072,8 +1342,9 @@ export default function OnboardingApp({ formToken }) {
                       <span className="text-sm text-stone-400 ml-auto">
                         {s.n === 1 && 'Confirm + add competitors'}
                         {s.n === 2 && 'Swipe blog posts they like'}
-                        {s.n === 3 && 'Review & edit all crawled data'}
-                        {s.n === 4 && 'Submit everything back to you'}
+                        {s.n === 3 && 'Voice call to gather more info'}
+                        {s.n === 4 && 'Review & edit all crawled data'}
+                        {s.n === 5 && 'Submit everything back to you'}
                       </span>
                     </div>
                   ))}
@@ -1153,7 +1424,7 @@ export default function OnboardingApp({ formToken }) {
                 </div>
                 <span className={`text-sm hidden sm:block ${clientStep >= s.n ? 'text-stone-800' : 'text-stone-400'}`}>{s.l}</span>
               </div>
-              {i < 3 && <div className={`flex-1 h-px ${clientStep > s.n ? 'bg-emerald-500' : 'bg-stone-200'}`} />}
+              {i < 4 && <div className={`flex-1 h-px ${clientStep > s.n ? 'bg-emerald-500' : 'bg-stone-200'}`} />}
             </React.Fragment>
           ))}
         </div>
@@ -1234,8 +1505,16 @@ export default function OnboardingApp({ formToken }) {
           </div>
         )}
 
-        {/* Client Step 3: Data Review */}
+        {/* Client Step 3: 11 Labs Call */}
         {clientStep === 3 && clientData && (
+          <ElevenLabsCall
+            clientData={clientData}
+            onComplete={() => setClientStep(4)}
+          />
+        )}
+
+        {/* Client Step 4: Data Review */}
+        {clientStep === 4 && clientData && (
           <div>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-stone-800 mb-2">Review Your Data</h2>
@@ -1243,15 +1522,15 @@ export default function OnboardingApp({ formToken }) {
             </div>
             <DataReview clientData={clientData} compData={compData} competitors={competitors} activeTab={activeTab} setActiveTab={setActiveTab} updateField={updateField} />
             <div className="mt-8 flex justify-center">
-              <button onClick={() => setClientStep(4)} className="px-8 py-3 bg-stone-800 text-white rounded-xl font-medium flex items-center gap-2">
+              <button onClick={() => setClientStep(5)} className="px-8 py-3 bg-stone-800 text-white rounded-xl font-medium flex items-center gap-2">
                 Looks Good <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
         )}
 
-        {/* Client Step 4: Submit */}
-        {clientStep === 4 && clientData && (
+        {/* Client Step 5: Submit */}
+        {clientStep === 5 && clientData && (
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm"><Send className="w-8 h-8 text-stone-600" /></div>
@@ -1277,7 +1556,7 @@ export default function OnboardingApp({ formToken }) {
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setClientStep(3)} disabled={loading} className="flex-1 py-3.5 border-2 rounded-xl font-medium text-stone-600 hover:bg-stone-50 disabled:opacity-50">
+              <button onClick={() => setClientStep(4)} disabled={loading} className="flex-1 py-3.5 border-2 rounded-xl font-medium text-stone-600 hover:bg-stone-50 disabled:opacity-50">
                 ← Back to Review
               </button>
               <button onClick={handleSubmit} disabled={loading} className="flex-1 py-3.5 bg-stone-800 text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-stone-700 disabled:bg-stone-400">
