@@ -488,8 +488,6 @@ const ElevenLabsCall = ({ clientData, onComplete }) => {
   const [error, setError] = useState(null);
   const conversationRef = React.useRef(null);
 
-  const AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
-
   // Icon components for this section
   const Mic = ({ className }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -517,11 +515,6 @@ const ElevenLabsCall = ({ clientData, onComplete }) => {
   );
 
   const startConversation = async () => {
-    if (!AGENT_ID) {
-      setError('No se ha configurado VITE_ELEVENLABS_AGENT_ID en las variables de entorno');
-      return;
-    }
-
     try {
       setStatus('connecting');
       setError(null);
@@ -529,29 +522,26 @@ const ElevenLabsCall = ({ clientData, onComplete }) => {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
+      // Get signed URL from backend
+      console.log('[ElevenLabs] Getting signed URL from backend...');
+      const sessionRes = await fetch(`${API_URL}/api/elevenlabs/session`);
+
+      if (!sessionRes.ok) {
+        const err = await sessionRes.json();
+        throw new Error(err.details || 'No se pudo obtener la sesión de ElevenLabs');
+      }
+
+      const { signedUrl } = await sessionRes.json();
+
+      if (!signedUrl) {
+        throw new Error('No se recibió la URL firmada del backend');
+      }
+
       // Dynamic import to avoid SSR issues
       const { Conversation } = await import('@elevenlabs/client');
 
-      // Build context about the client for the agent
-      const clientContext = `
-Company: ${clientData?.name || 'Unknown'}
-Domain: ${clientData?.domain || 'Unknown'}
-Industry: ${clientData?.data?.industry || 'Not specified'}
-About: ${clientData?.data?.about || 'No description'}
-USP: ${clientData?.data?.usp || 'Not defined'}
-ICP: ${clientData?.data?.icp || 'Not defined'}
-      `.trim();
-
       conversationRef.current = await Conversation.startSession({
-        agentId: AGENT_ID,
-        overrides: {
-          agent: {
-            firstMessage: `Hola! Soy el asistente de Be The Answer. Veo que estás configurando el onboarding para ${clientData?.name || 'tu empresa'}. Tengo algunas preguntas para completar tu perfil. ¿Estás listo para empezar?`,
-            prompt: {
-              prompt: `You are a helpful onboarding assistant for Be The Answer. You're helping gather additional information about a company. Here's what we already know:\n\n${clientContext}\n\nAsk follow-up questions to fill in any gaps. Focus on: support hours, unique value propositions, ideal customer details, founder backgrounds, and social media presence. Be conversational and friendly. Speak in Spanish.`
-            }
-          }
-        },
+        signedUrl: signedUrl,
         onConnect: () => {
           console.log('[ElevenLabs] Connected');
           setStatus('connected');
@@ -622,27 +612,13 @@ ICP: ${clientData?.data?.icp || 'Not defined'}
         </div>
       )}
 
-      {/* No Agent ID warning */}
-      {!AGENT_ID && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-          <div className="flex items-center gap-2 text-amber-700">
-            <AlertCircle className="w-5 h-5" />
-            <div>
-              <p className="text-sm font-medium">Agent ID no configurado</p>
-              <p className="text-xs">Agrega VITE_ELEVENLABS_AGENT_ID a tu archivo .env</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Call interface */}
       <div className="bg-white rounded-2xl border p-6 mb-6 shadow-sm">
         {status === 'idle' && (
           <div className="text-center py-8">
             <button
               onClick={startConversation}
-              disabled={!AGENT_ID}
-              className="w-24 h-24 rounded-full bg-violet-500 hover:bg-violet-600 disabled:bg-stone-300 flex items-center justify-center mx-auto mb-4 transition-all hover:scale-105 shadow-lg"
+              className="w-24 h-24 rounded-full bg-violet-500 hover:bg-violet-600 flex items-center justify-center mx-auto mb-4 transition-all hover:scale-105 shadow-lg"
             >
               <PhoneCall className="w-12 h-12 text-white" />
             </button>
