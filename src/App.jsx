@@ -481,11 +481,12 @@ const StyleSelection = ({ blogPosts, onComplete, likedPosts, setLikedPosts }) =>
 
 
 // === ELEVEN LABS CONVERSATIONAL AI ===
-const ElevenLabsCall = ({ clientData, onComplete }) => {
+const ElevenLabsCall = ({ clientData, onComplete, onTranscriptUpdate }) => {
   const [status, setStatus] = useState('idle'); // idle, connecting, connected, ended
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState([]);
   const [error, setError] = useState(null);
+  const [callStartTime, setCallStartTime] = useState(null);
   const conversationRef = React.useRef(null);
 
   // Icon components for this section
@@ -545,6 +546,7 @@ const ElevenLabsCall = ({ clientData, onComplete }) => {
         onConnect: () => {
           console.log('[ElevenLabs] Connected');
           setStatus('connected');
+          setCallStartTime(Date.now());
         },
         onDisconnect: () => {
           console.log('[ElevenLabs] Disconnected');
@@ -574,9 +576,14 @@ const ElevenLabsCall = ({ clientData, onComplete }) => {
   };
 
   const endConversation = async () => {
+    const duration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : null;
     if (conversationRef.current) {
       await conversationRef.current.endSession();
       conversationRef.current = null;
+    }
+    // Pass transcript data to parent
+    if (onTranscriptUpdate) {
+      onTranscriptUpdate({ transcript, completed: true, duration });
     }
     setStatus('ended');
   };
@@ -680,6 +687,12 @@ const ElevenLabsCall = ({ clientData, onComplete }) => {
               >
                 <PhoneCall className="w-6 h-6" />
               </button>
+            </div>
+            {/* End call message */}
+            <div className="mt-4 text-center">
+              <p className="text-stone-500 text-sm bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-block">
+                ✋ Cuando termines, presiona el botón rojo para finalizar la llamada
+              </p>
             </div>
           </div>
         )}
@@ -929,8 +942,9 @@ export default function OnboardingApp({ formToken }) {
   const [submitted, setSubmitted] = useState(false);
   const [sitemapData, setSitemapData] = useState(null); // Scraped sitemap/llms.txt data
   const [blogError, setBlogError] = useState(null);
+  const [elevenLabsData, setElevenLabsData] = useState({ transcript: [], completed: false, duration: null }); // 11Labs call data
 
-  // Client flow steps: 1=Competitors, 2=Style, 3=DataReview, 4=Submit
+  // Client flow steps: 1=Competitors, 2=Style, 3=11Labs, 4=DataReview, 5=Submit
   const [clientStep, setClientStep] = useState(1);
   const [formLoading, setFormLoading] = useState(!!formToken);
   const [formError, setFormError] = useState(null);
@@ -1177,7 +1191,8 @@ export default function OnboardingApp({ formToken }) {
           likedPosts,
           customUrls: customUrls.filter(u => u.trim() !== ''),
           compData,
-          sitemapData
+          sitemapData,
+          elevenLabsData
         })
       });
 
@@ -1434,8 +1449,8 @@ export default function OnboardingApp({ formToken }) {
               </div>
             </div>
             <div className="mt-8 flex justify-center">
-              <button onClick={crawlComps} disabled={!competitors.length || loading} className="px-8 py-3 bg-stone-800 text-white rounded-xl disabled:bg-stone-300 font-medium flex items-center gap-2">
-                {loading ? loadMsg : <><span>Analyze {competitors.length} Competitors</span><ArrowRight className="w-5 h-5" /></>}
+              <button onClick={crawlComps} disabled={loading} className="px-8 py-3 bg-stone-800 text-white rounded-xl disabled:bg-stone-300 font-medium flex items-center gap-2">
+                {loading ? loadMsg : <><span>{competitors.length > 0 ? `Analyze ${competitors.length} Competitors` : 'Continue Without Competitors'}</span><ArrowRight className="w-5 h-5" /></>}
               </button>
             </div>
           </div>
@@ -1486,6 +1501,7 @@ export default function OnboardingApp({ formToken }) {
           <ElevenLabsCall
             clientData={clientData}
             onComplete={() => setClientStep(4)}
+            onTranscriptUpdate={setElevenLabsData}
           />
         )}
 
@@ -1515,15 +1531,73 @@ export default function OnboardingApp({ formToken }) {
             </div>
 
             <div className="bg-white rounded-2xl border p-6 mb-6 shadow-sm">
-              <h3 className="font-medium text-stone-800 mb-4">Summary</h3>
-              <div className="text-sm space-y-1">
-                <div className="flex justify-between py-3 border-b border-stone-100"><span className="text-stone-500">Your company</span><span className="font-medium">{clientData.name}</span></div>
-                <div className="flex justify-between py-3 border-b border-stone-100"><span className="text-stone-500">Domain</span><span className="font-medium">{clientData.domain}</span></div>
-                <div className="flex justify-between py-3 border-b border-stone-100"><span className="text-stone-500">Competitors</span><span className="font-medium">{competitors.length} analyzed</span></div>
-                <div className="flex justify-between py-3 border-b border-stone-100"><span className="text-stone-500">Content styles liked</span><span className="font-medium">{likedPosts.length} posts</span></div>
-                <div className="flex justify-between py-3 border-b border-stone-100"><span className="text-stone-500">Features listed</span><span className="font-medium">{clientData.data?.features?.length || 0}</span></div>
-                <div className="flex justify-between py-3"><span className="text-stone-500">Integrations</span><span className="font-medium">{clientData.data?.integrations?.length || 0}</span></div>
+              <h3 className="font-medium text-stone-800 mb-4">📋 Summary of Collected Data</h3>
+
+              {/* Client Overview */}
+              <div className="mb-4 p-4 bg-stone-50 rounded-xl">
+                <h4 className="font-medium text-stone-700 mb-2 flex items-center gap-2">
+                  <img src={favicon(clientData.domain)} width={18} height={18} alt="" className="rounded" />
+                  {clientData.name}
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><span className="text-stone-400">Domain:</span> <span className="text-stone-700">{clientData.domain}</span></div>
+                  <div><span className="text-stone-400">Industry:</span> <span className="text-stone-700">{clientData.data?.industry || 'N/A'}</span></div>
+                  <div><span className="text-stone-400">Features:</span> <span className="text-stone-700">{clientData.data?.features?.length || 0}</span></div>
+                  <div><span className="text-stone-400">Integrations:</span> <span className="text-stone-700">{clientData.data?.integrations?.length || 0}</span></div>
+                </div>
+                {clientData.data?.usp && <p className="text-sm text-stone-600 mt-2 italic">"{clientData.data.usp}"</p>}
               </div>
+
+              {/* Competitors */}
+              {competitors.length > 0 && (
+                <div className="mb-4 p-4 bg-blue-50 rounded-xl">
+                  <h4 className="font-medium text-blue-700 mb-2">🎯 {competitors.length} Competitors Analyzed</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {competitors.map((c, i) => (
+                      <span key={i} className="text-sm bg-white px-3 py-1 rounded-full border flex items-center gap-1.5">
+                        <img src={favicon(c.domain)} width={14} height={14} alt="" className="rounded" />
+                        {c.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Liked Posts */}
+              {likedPosts.length > 0 && (
+                <div className="mb-4 p-4 bg-emerald-50 rounded-xl">
+                  <h4 className="font-medium text-emerald-700 mb-2">💚 {likedPosts.length} Content Styles Liked</h4>
+                  <div className="space-y-1">
+                    {likedPosts.slice(0, 3).map((p, i) => (
+                      <p key={i} className="text-sm text-stone-600 truncate">• {p.title}</p>
+                    ))}
+                    {likedPosts.length > 3 && <p className="text-xs text-stone-400">+{likedPosts.length - 3} more</p>}
+                  </div>
+                </div>
+              )}
+
+              {/* ElevenLabs Call */}
+              {elevenLabsData.completed && (
+                <div className="mb-4 p-4 bg-violet-50 rounded-xl">
+                  <h4 className="font-medium text-violet-700 mb-2">📞 AI Call Completed</h4>
+                  <div className="text-sm text-stone-600">
+                    <p>Duration: {elevenLabsData.duration ? `${Math.floor(elevenLabsData.duration / 60)}m ${elevenLabsData.duration % 60}s` : 'N/A'}</p>
+                    <p>Messages: {elevenLabsData.transcript?.length || 0}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom URLs */}
+              {customUrls.filter(u => u.trim()).length > 0 && (
+                <div className="p-4 bg-amber-50 rounded-xl">
+                  <h4 className="font-medium text-amber-700 mb-2">🔗 {customUrls.filter(u => u.trim()).length} Custom Reference URLs</h4>
+                  <div className="space-y-1">
+                    {customUrls.filter(u => u.trim()).map((u, i) => (
+                      <p key={i} className="text-sm text-stone-600 truncate">• {u}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-2xl border p-6 mb-6 shadow-sm">
